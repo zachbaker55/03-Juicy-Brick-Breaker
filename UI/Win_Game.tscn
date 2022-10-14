@@ -1,0 +1,123 @@
+[gd_scene load_steps=14 format=2]
+
+[ext_resource path="res://UI/UI.tres" type="Theme" id=1]
+[ext_resource path="res://Assets/Sound/SE_wow.wav" type="AudioStream" id=2]
+[ext_resource path="res://Assets/Sound/SE_incredible.wav" type="AudioStream" id=3]
+[ext_resource path="res://Assets/Sound/SE_coolbeans.wav" type="AudioStream" id=4]
+[ext_resource path="res://Assets/Sound/SE_dang.wav" type="AudioStream" id=5]
+[ext_resource path="res://UI/Win_Game.gd" type="Script" id=6]
+[ext_resource path="res://Assets/Sound/SE_exuberant.wav" type="AudioStream" id=7]
+[ext_resource path="res://Assets/Sound/SE_ohmy.wav" type="AudioStream" id=8]
+[ext_resource path="res://Assets/Sound/SE_nice.wav" type="AudioStream" id=9]
+
+[sub_resource type="Shader" id=1]
+code = "shader_type canvas_item;
+
+uniform sampler2D noise;
+uniform vec4 line_color_a: hint_color = vec4(1.0, 1.0, 1.0, 1.0);
+uniform vec4 line_color_b: hint_color = vec4(0.0, 1.0, 1.0, 1.0);
+uniform float line_threshold = 0.6;
+uniform float inverse_speed = 10.0;
+uniform float line_length = 1000.0;
+uniform float angle: hint_range(0.0, 360.0) = 0.0;
+
+
+void fragment() {
+	vec2 uv = vec2(UV.x * cos(radians(angle)) - UV.y * sin(radians(angle)), UV.x * sin(radians(angle)) + UV.y * cos(radians(angle)));
+	vec4 noise_line = texture(noise, vec2(uv.x / line_length + TIME / inverse_speed, uv.y));
+	vec4 color;
+	if (noise_line.r < line_threshold){
+		color = vec4(0.);
+	} else {
+		color = mix(line_color_a, line_color_b, 1.0 - noise_line.r);
+	}
+	COLOR = color;
+}"
+
+[sub_resource type="OpenSimplexNoise" id=2]
+
+[sub_resource type="NoiseTexture" id=3]
+seamless = true
+noise = SubResource( 2 )
+
+[sub_resource type="ShaderMaterial" id=4]
+shader = SubResource( 1 )
+shader_param/line_color_a = Color( 0.745098, 0.835294, 0.74902, 1 )
+shader_param/line_color_b = Color( 0.337255, 1, 0.423529, 1 )
+shader_param/line_threshold = 0.6
+shader_param/inverse_speed = 10.0
+shader_param/line_length = 50.0
+shader_param/angle = 0.0
+shader_param/noise = SubResource( 3 )
+
+[node name="Win_Game" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource( 1 )
+script = ExtResource( 6 )
+
+[node name="Background" type="ColorRect" parent="."]
+material = SubResource( 4 )
+margin_right = 1024.0
+margin_bottom = 800.0
+color = Color( 0.333333, 0.333333, 0.333333, 1 )
+
+[node name="Label" type="Label" parent="."]
+anchor_right = 1.0
+anchor_bottom = 0.75
+text = "You win! Congratulations!"
+align = 1
+valign = 1
+
+[node name="Restart" type="Button" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -100.0
+margin_top = -73.0
+margin_right = 100.0
+margin_bottom = -33.0
+text = "Restart Game"
+
+[node name="Quit" type="Button" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -100.0
+margin_top = -20.0
+margin_right = 100.0
+margin_bottom = 20.0
+text = "Quit"
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 2.0
+autostart = true
+
+[node name="SE_Container" type="Node2D" parent="."]
+
+[node name="se_coolbeans" type="AudioStreamPlayer" parent="SE_Container"]
+stream = ExtResource( 4 )
+
+[node name="se_dang" type="AudioStreamPlayer" parent="SE_Container"]
+stream = ExtResource( 5 )
+
+[node name="se_incredible" type="AudioStreamPlayer" parent="SE_Container"]
+stream = ExtResource( 3 )
+
+[node name="se_nice" type="AudioStreamPlayer" parent="SE_Container"]
+stream = ExtResource( 9 )
+
+[node name="se_exuberant" type="AudioStreamPlayer" parent="SE_Container"]
+stream = ExtResource( 7 )
+
+[node name="se_ohmy" type="AudioStreamPlayer" parent="SE_Container"]
+stream = ExtResource( 8 )
+
+[node name="se_wow" type="AudioStreamPlayer" parent="SE_Container"]
+stream = ExtResource( 2 )
+
+[connection signal="pressed" from="Restart" to="." method="_on_Restart_pressed"]
+[connection signal="pressed" from="Quit" to="." method="_on_Quit_pressed"]
+[connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]

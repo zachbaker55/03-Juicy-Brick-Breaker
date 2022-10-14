@@ -1,0 +1,99 @@
+[gd_scene load_steps=11 format=2]
+
+[ext_resource path="res://UI/End_Game.gd" type="Script" id=1]
+[ext_resource path="res://UI/UI.tres" type="Theme" id=2]
+[ext_resource path="res://Assets/Sound/SE_game.wav" type="AudioStream" id=3]
+[ext_resource path="res://Assets/Sound/SE_gameover.wav" type="AudioStream" id=4]
+[ext_resource path="res://Assets/Sound/SE_tryagain.wav" type="AudioStream" id=5]
+[ext_resource path="res://Assets/Sound/SE_explosion.wav" type="AudioStream" id=6]
+
+[sub_resource type="Shader" id=10]
+code = "//Shader by: Jordancjb (https://linktr.ee/jordancjb)
+//Licensed under Creative Commons 0, Use as you like c:
+shader_type canvas_item;
+
+//Noise Texture
+uniform sampler2D Noise;
+
+//Settings
+uniform float Transparency = 4.0;
+uniform float Slow = 25.0;
+
+//Shader Code
+void fragment() {
+	COLOR = texture(SCREEN_TEXTURE, SCREEN_UV) * texture(Noise, texture(Noise, UV).xy + cos(TIME) / Slow) / Transparency;
+}"
+
+[sub_resource type="OpenSimplexNoise" id=7]
+persistence = 0.0
+lacunarity = 0.1
+
+[sub_resource type="NoiseTexture" id=11]
+seamless = true
+bump_strength = 0.0
+noise = SubResource( 7 )
+
+[sub_resource type="ShaderMaterial" id=9]
+shader = SubResource( 10 )
+shader_param/Transparency = 4.0
+shader_param/Slow = 10.0
+shader_param/Noise = SubResource( 11 )
+
+[node name="End_Game" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource( 2 )
+script = ExtResource( 1 )
+
+[node name="Background" type="ColorRect" parent="."]
+material = SubResource( 9 )
+margin_right = 1024.0
+margin_bottom = 800.0
+color = Color( 0.333333, 0.333333, 0.333333, 1 )
+
+[node name="Label" type="Label" parent="."]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 0.75
+text = "Thanks for playing!"
+align = 1
+valign = 1
+
+[node name="Restart" type="Button" parent="."]
+visible = false
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -100.0
+margin_top = -73.0
+margin_right = 100.0
+margin_bottom = -33.0
+text = "Restart Game"
+
+[node name="Quit" type="Button" parent="."]
+visible = false
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -100.0
+margin_top = -20.0
+margin_right = 100.0
+margin_bottom = 20.0
+text = "Quit"
+
+[node name="SE_explosion" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 6 )
+
+[node name="SE_game" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 3 )
+
+[node name="SE_gameover" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 4 )
+
+[node name="SE_tryagain" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 5 )
+
+[connection signal="pressed" from="Restart" to="." method="_on_Restart_pressed"]
+[connection signal="pressed" from="Quit" to="." method="_on_Quit_pressed"]
